@@ -1,0 +1,10 @@
+{
+  "FileVersion": 2,
+  "Id": "5c39d8f0-7169-4fe0-8e0c-228d2dff70b7",
+  "Items": [
+    {
+      "Id": "64a5f104-be0d-4178-b174-8d5fa1633e27",
+      "Command": ">log.txt"
+    }
+  ]
+}
