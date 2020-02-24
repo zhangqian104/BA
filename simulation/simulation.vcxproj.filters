@@ -1,51 +1,193 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="src">
+    <Filter Include="main">
+      <UniqueIdentifier>{aa881f4d-7ebb-4c8a-9fcd-e520963ccf80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simulation_data_generation">
       <UniqueIdentifier>{1f93bbd5-8b78-4ca8-9f97-514cbaaa8935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simulation_data_generation\include">
+      <UniqueIdentifier>{86305485-5ec9-41b5-8cfb-149276e2bf83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simulation_data_generation\src">
+      <UniqueIdentifier>{d48cbaad-6a96-45b0-878b-85da65c19be6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="triangulation">
+      <UniqueIdentifier>{a7e124c4-58b1-4258-b37b-b594aa448b0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="triangulation\include">
+      <UniqueIdentifier>{4ed7454a-5349-41b2-b27b-fb3b3d183542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="triangulation\src">
+      <UniqueIdentifier>{9dedd06b-ba00-42ed-8f99-2f36fae5f7ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nonlinear_optimization_solver">
+      <UniqueIdentifier>{13d1c5d9-a169-4b04-90f0-d652227c9961}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nonlinear_optimization_solver\include">
+      <UniqueIdentifier>{f7ca26a0-d21a-46e1-b070-8e312806053f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nonlinear_optimization_solver\src">
+      <UniqueIdentifier>{053e0699-5db9-44f4-94c4-b1d9762fa177}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imu_model">
+      <UniqueIdentifier>{10645a69-4329-4584-aaaa-1c8582180901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imu_model\include">
+      <UniqueIdentifier>{b974f948-007f-42cd-b717-fa7491ff669d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imu_model\src">
+      <UniqueIdentifier>{2b111710-1827-42bb-9f29-506b31ee7152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{52e25748-9fad-4ec0-bfc8-c48088b44247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility\include">
+      <UniqueIdentifier>{aed6dab8-9e29-4cb3-9cec-e9184aa6ba48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility\src">
+      <UniqueIdentifier>{59d52cb3-32c7-43f1-90ec-116c70b2cf54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="navstate">
+      <UniqueIdentifier>{c992358c-1f7c-41b9-b351-98e563701331}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="navstate\include">
+      <UniqueIdentifier>{d43f7913-632f-481c-aa09-8166b1d87561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="navstate\src">
+      <UniqueIdentifier>{6a89319a-1936-4260-9b9e-7c12d299f6e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sophus">
+      <UniqueIdentifier>{0cd04b60-fcc5-4e35-8ab3-cd651deb8269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sophus\include">
+      <UniqueIdentifier>{1a3573c6-289c-417d-9f51-d52d7e39eb11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sophus\src">
+      <UniqueIdentifier>{48ac3309-52e1-465b-8a0f-5cae1652f890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{4e456228-67ca-424f-801a-b0e56bc47f07}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\imu.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\main\main.cpp">
+      <Filter>main</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\param.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\triangulation\src\triangulation.cpp">
+      <Filter>triangulation\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\utilities.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\gener_alldata.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_imu.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\triangulation.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_prior.cpp">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_reprojection.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\loss_function.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\problem.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\vertex.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nonlinear_optimization_solver\src\vertex_pose.cc">
+      <Filter>nonlinear_optimization_solver\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utility\src\utility.cpp">
+      <Filter>utility\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\navstate\src\NavState.cpp">
+      <Filter>navstate\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sophus\src\so3.cpp">
+      <Filter>sophus\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\param.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simulation_data_generation\src\gene_simulate_data.cpp">
+      <Filter>simulation_data_generation\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imu_model\src\imu_integration.cpp">
+      <Filter>imu_model\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\imu.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\triangulation\include\triangulation.h">
+      <Filter>triangulation\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\param.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\utilities.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_imu.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\triangulation.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_prior.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_reprojection.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\loss_function.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\problem.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_inverse_depth.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_point_xyz.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_pose.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_speedbias.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nonlinear_optimization_solver\include\nonlinear_optimization_solver.h">
+      <Filter>nonlinear_optimization_solver\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imu_model\include\imu_integration.h">
+      <Filter>imu_model\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utility\include\tic_toc.h">
+      <Filter>utility\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utility\include\utility.h">
+      <Filter>utility\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\navstate\include\NavState.h">
+      <Filter>navstate\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sophus\include\so3.h">
+      <Filter>sophus\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\common.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\param.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\simulation_data_generation\include\gene_simulate_data.h">
+      <Filter>simulation_data_generation\include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

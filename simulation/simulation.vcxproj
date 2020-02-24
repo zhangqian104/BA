@@ -19,17 +19,45 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\main\gener_alldata.cpp" />
-    <ClCompile Include="..\src\imu.cpp" />
-    <ClCompile Include="..\src\param.cpp" />
-    <ClCompile Include="..\src\triangulation.cpp" />
-    <ClCompile Include="..\src\utilities.cpp" />
+    <ClCompile Include="..\common\param.cpp" />
+    <ClCompile Include="..\imu_model\src\imu_integration.cpp" />
+    <ClCompile Include="..\main\main.cpp" />
+    <ClCompile Include="..\navstate\src\NavState.cpp" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_imu.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_prior.cpp" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_reprojection.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\loss_function.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\problem.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\vertex.cc" />
+    <ClCompile Include="..\nonlinear_optimization_solver\src\vertex_pose.cc" />
+    <ClCompile Include="..\simulation_data_generation\src\gene_simulate_data.cpp" />
+    <ClCompile Include="..\sophus\src\so3.cpp" />
+    <ClCompile Include="..\triangulation\src\triangulation.cpp" />
+    <ClCompile Include="..\utility\src\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\imu.h" />
-    <ClInclude Include="..\src\param.h" />
-    <ClInclude Include="..\src\triangulation.h" />
-    <ClInclude Include="..\src\utilities.h" />
+    <ClInclude Include="..\common\common.h" />
+    <ClInclude Include="..\common\param.h" />
+    <ClInclude Include="..\imu_model\include\imu_integration.h" />
+    <ClInclude Include="..\navstate\include\NavState.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\nonlinear_optimization_solver.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_imu.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_prior.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_reprojection.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\loss_function.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\problem.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_inverse_depth.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_point_xyz.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_pose.h" />
+    <ClInclude Include="..\nonlinear_optimization_solver\include\vertex_speedbias.h" />
+    <ClInclude Include="..\simulation_data_generation\include\gene_simulate_data.h" />
+    <ClInclude Include="..\sophus\include\so3.h" />
+    <ClInclude Include="..\triangulation\include\triangulation.h" />
+    <ClInclude Include="..\utility\include\tic_toc.h" />
+    <ClInclude Include="..\utility\include\utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -119,6 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../;../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +185,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;../src;../bin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;../bin;../simulation_data_generation/include;../simulation_data_generation/src;../triangulation/include;../triangulation/src;../nonlinear_optimization_solver/include;../nonlinear_optimization_solver/src;../imu_model/include;../imu_model/src;../utility/include;../utility/src;../navstate/include;../navstate/src;../sophus/include;../sophus/src;../common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
