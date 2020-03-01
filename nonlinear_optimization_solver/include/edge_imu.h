@@ -1,4 +1,4 @@
-#ifndef MYSLAM_BACKEND_IMUEDGE_H
+﻿#ifndef MYSLAM_BACKEND_IMUEDGE_H
 #define MYSLAM_BACKEND_IMUEDGE_H
 
 #include <memory>
@@ -15,7 +15,7 @@ class EdgeImu : public Edge {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-    explicit EdgeImu(IMUPreintegRecursive* _pre_integration):pre_integration_(_pre_integration),
+    explicit EdgeImu(SLAM_SIMULATION::IMUPreintegRecursive* _pre_integration):pre_integration_(_pre_integration),
           Edge(15, 4, std::vector<std::string>{"VertexPose", "VertexSpeedBias", "VertexPose", "VertexSpeedBias"}) {
 //        if (pre_integration_) {
 //            pre_integration_->GetJacobians(dr_dbg_, dv_dbg_, dv_dba_, dp_dbg_, dp_dba_);
@@ -42,22 +42,14 @@ public:
 //    }
 
 private:
-    enum StateOrder
-    {
-        O_P = 0,
-        O_R = 3,
-        O_V = 6,
-        O_BA = 9,
-        O_BG = 12
-    };
-	IMUPreintegRecursive* pre_integration_;
-    static Eigen::Matrix<double, 3, 1> gravity_;
+	SLAM_SIMULATION::IMUPreintegRecursive* pre_integration_;
+    static Eigen::Vector3d gravity_;
 
-	Eigen::Matrix<double, 3, 3> dp_dba_ = Eigen::Matrix<double, 3, 3>::Zero();
-	Eigen::Matrix<double, 3, 3> dp_dbg_ = Eigen::Matrix<double, 3, 3>::Zero();
-	Eigen::Matrix<double, 3, 3> dr_dbg_ = Eigen::Matrix<double, 3, 3>::Zero();
-	Eigen::Matrix<double, 3, 3> dv_dba_ = Eigen::Matrix<double, 3, 3>::Zero();
-	Eigen::Matrix<double, 3, 3> dv_dbg_ = Eigen::Matrix<double, 3, 3>::Zero();
+	Eigen::Matrix3d dp_dba_ = Eigen::Matrix3d::Zero();
+	Eigen::Matrix3d dp_dbg_ = Eigen::Matrix3d::Zero();
+	Eigen::Matrix3d dr_dbg_ = Eigen::Matrix3d::Zero();
+	Eigen::Matrix3d dv_dba_ = Eigen::Matrix3d::Zero();
+	Eigen::Matrix3d dv_dbg_ = Eigen::Matrix3d::Zero();
 };
 
 }

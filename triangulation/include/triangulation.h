@@ -4,7 +4,7 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
 
-#define M_PI 3.14159
+//#define M_PI 3.14159
 
 class Triangulation {
 public:

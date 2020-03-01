@@ -1,6 +1,7 @@
-#include "vertex_pose.h"
+﻿#include "vertex_pose.h"
 #include "edge_reprojection.h"
 #include "utility.h"
+#include "so3.h"
 
 #include <iostream>
 
@@ -80,13 +81,13 @@ void EdgeReprojection::ComputeJacobians() {
     Eigen::Matrix<double, 2, 6> jacobian_pose_i;
     Eigen::Matrix<double, 3, 6> jaco_i;
     jaco_i.leftCols<3>() = ric.transpose() * Rj.transpose();
-    jaco_i.rightCols<3>() = ric.transpose() * Rj.transpose() * Ri * -Sophus::SO3d::hat(pts_imu_i);
+    jaco_i.rightCols<3>() = ric.transpose() * Rj.transpose() * Ri * -Sophus::SO3::hat(pts_imu_i);
     jacobian_pose_i.leftCols<6>() = reduce * jaco_i;
 
     Eigen::Matrix<double, 2, 6> jacobian_pose_j;
     Eigen::Matrix<double, 3, 6> jaco_j;
     jaco_j.leftCols<3>() = ric.transpose() * -Rj.transpose();
-    jaco_j.rightCols<3>() = ric.transpose() * Sophus::SO3d::hat(pts_imu_j);
+    jaco_j.rightCols<3>() = ric.transpose() * Sophus::SO3::hat(pts_imu_j);
     jacobian_pose_j.leftCols<6>() = reduce * jaco_j;
 
     Eigen::Vector2d jacobian_feature;
@@ -134,6 +135,7 @@ void EdgeReprojectionXYZ::ComputeResidual() {
 
 	Eigen::Matrix<double, 3, 1> pts_imu_i = Qi.inverse() * (pts_w - Pi);
 	Eigen::Matrix<double, 3, 1> pts_camera_i = qic.inverse() * (pts_imu_i - tic);
+	auto qicInv = qic.inverse();
 
     double dep_i = pts_camera_i.z();
     residual_ = (pts_camera_i / dep_i).head<2>() - obs_.head<2>();
@@ -166,7 +168,7 @@ void EdgeReprojectionXYZ::ComputeJacobians() {
     Eigen::Matrix<double, 2, 6> jacobian_pose_i;
     Eigen::Matrix<double, 3, 6> jaco_i;
     jaco_i.leftCols<3>() = ric.transpose() * -Ri.transpose();
-    jaco_i.rightCols<3>() = ric.transpose() * Sophus::SO3d::hat(pts_imu_i);
+    jaco_i.rightCols<3>() = ric.transpose() * Sophus::SO3::hat(pts_imu_i);
     jacobian_pose_i.leftCols<6>() = reduce * jaco_i;
 
     Eigen::Matrix<double, 2, 3> jacobian_feature;
@@ -177,19 +179,19 @@ void EdgeReprojectionXYZ::ComputeJacobians() {
 
 }
 
-void EdgeReprojectionPoseOnly::ComputeResidual() {
-	Eigen::Matrix<double, Eigen::Dynamic, 1> pose_params = verticies_[0]->Parameters();
-    Sophus::SE3d pose(
-        Qd(pose_params[6], pose_params[3], pose_params[4], pose_params[5]),
-        pose_params.head<3>()
-    );
-
-	Eigen::Matrix<double, 3, 1> pc = pose * landmark_world_;
-    pc = pc / pc[2];
-	Eigen::Matrix<double, 2, 1> pixel = (K_ * pc).head<2>() - observation_;
-    // TODO:: residual_ = ????
-    residual_ = pixel;
-}
+//void EdgeReprojectionPoseOnly::ComputeResidual() {
+//	Eigen::Matrix<double, Eigen::Dynamic, 1> pose_params = verticies_[0]->Parameters();
+//    Sophus::SE3 pose(
+//        Qd(pose_params[6], pose_params[3], pose_params[4], pose_params[5]),
+//        pose_params.head<3>()
+//    );
+//
+//	Eigen::Matrix<double, 3, 1> pc = pose * landmark_world_;
+//    pc = pc / pc[2];
+//	Eigen::Matrix<double, 2, 1> pixel = (K_ * pc).head<2>() - observation_;
+//    // TODO:: residual_ = ????
+//    residual_ = pixel;
+//}
 
 void EdgeReprojectionPoseOnly::ComputeJacobians() {
     // TODO implement jacobian here

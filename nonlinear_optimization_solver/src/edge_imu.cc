@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace NonlinearSolver {
-	Eigen::Matrix<double, 3, 1> EdgeImu::gravity_ = Vec3(0, 0, 9.8);
+	Eigen::Vector3d EdgeImu::gravity_ = Eigen::Vector3d (0, 0, 9.8);
 
 void EdgeImu::ComputeResidual() {
 	Eigen::Matrix<double, Eigen::Dynamic, 1> param_0 = verticies_[0]->Parameters();
@@ -26,7 +26,7 @@ void EdgeImu::ComputeResidual() {
 	Eigen::Vector3d Baj = param_3.segment(3, 3);
 	Eigen::Vector3d Bgj = param_3.tail<3>();
 
-    residual_ = pre_integration_->evaluate(Pi, Qi, Vi, Bai, Bgi,
+    residual_ = pre_integration_->Evaluate(Pi, Qi, Vi, Bai, Bgi,
                               Pj, Qj, Vj, Baj, Bgj);
 //    Mat1515 sqrt_info  = Eigen::LLT< Mat1515 >(pre_integration_->covariance.inverse()).matrixL().transpose();
     SetInformation(pre_integration_->covariance.inverse());
@@ -149,8 +149,5 @@ void EdgeImu::ComputeJacobians() {
         jacobians_[3] = jacobian_speedbias_j;
 
     }
-
-
 }
-
 }

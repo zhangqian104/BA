@@ -1,4 +1,4 @@
-#ifndef LOSS_FUNCTION_H
+﻿#ifndef LOSS_FUNCTION_H
 #define LOSS_FUNCTION_H
 
 namespace NonlinearSolver {

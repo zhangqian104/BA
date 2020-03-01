@@ -1,6 +1,7 @@
 ﻿#include <random>
 #include "gene_simulate_data.h"
 #include"utility.h"
+#include "id_manage.h"
 
 namespace SLAM_SIMULATION {
 	GeneSimulateData::GeneSimulateData(Param p_, std::string inputPath_, std::string outputPath_)

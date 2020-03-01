@@ -15,12 +15,36 @@ std::string houseModelPath = "C:\\Users\\Administrator\\Desktop\\simulation\\bin
 std::string outputDataPath = "C:\\Users\\Administrator\\Desktop\\simulation\\simulation\\OutputData";
 std::string camPoseAndObsPath = "CamPoseAndObs.txt";
 
-bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
+struct KeyFrame
+{
+	double timestamp;
+	std::vector<double> imuTimes;
+	std::vector<Eigen::Vector3d> imuAccs;
+	std::vector<Eigen::Vector3d> imuGyros;
+	std::vector<Eigen::Vector3d> accBiass;
+	std::vector<Eigen::Vector3d> gyroBiass;
+	std::vector<RowPose> rsPoses;
+	PointsType pointsCam;    // 3D points in current cam
+	ObsersType featuresCam;  // corresponding 2D observations
+
+	Eigen::Matrix3d Rwc;
+	Eigen::Quaterniond qwc;
+	Eigen::Vector3d twc;
+	Eigen::Vector3d twcNoise;
+	Eigen::Vector3d vel;
+
+	IMUPreintegRecursive *imuPreintgR; //IMU preintegration recursive
+	IMUPreintegBatch *imuPreintgB; //IMU preintegration batch
+};
+
+bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames,std::vector<MapPoint> &mapPoints)
 {
 	int numKFs = keyFrames.size();
 	if (numKFs <= 0) {
 		return false;
 	}
+
+	Param params;
 
 	NonlinearSolver::LossFunction *lossFunction;
 	lossFunction = new NonlinearSolver::CauchyLoss(1.0);
@@ -31,15 +55,19 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 	std::vector<std::shared_ptr<NonlinearSolver::VertexSpeedBias>> vertexVB_vec;
 	int pose_dim = 0;
 
-	for (int i = 0; i < numKFs + 1; i++){
+	for (int i = 0; i < numKFs; i++){
 		KeyFrame kf = keyFrames[i];
 		std::shared_ptr<NonlinearSolver::VertexPose> vertexCam(new NonlinearSolver::VertexPose());
 		Eigen::VectorXd pose(7);
-		pose << kf.twcNoise[0], kf.twcNoise[1], kf.twcNoise[2], kf.qwc.x, kf.qwc.y, kf.qwc.z, kf.qwc.w;
+		pose << kf.twcNoise[0], kf.twcNoise[1], kf.twcNoise[2], kf.qwc.x(), kf.qwc.y(), kf.qwc.z(), kf.qwc.w();
 		vertexCam->SetParameters(pose);
 		vertexCams_vec.push_back(vertexCam);
+		if (i == 0) {
+			vertexCam->SetFixed();
+		}
 		problem.AddVertex(vertexCam);
 		pose_dim += vertexCam->LocalDimension();
+		
 
 		std::shared_ptr<NonlinearSolver::VertexSpeedBias> vertexVB(new NonlinearSolver::VertexSpeedBias());
 		Eigen::VectorXd vb(9);
@@ -52,15 +80,16 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 	}
 
 	// IMU
-	for (int i = 1; i < numKFs; i++)
-	{
+#define IMU_FACTOR
+#ifdef IMU_FACTOR
+	for (int i = 1; i < numKFs; i++){
 		KeyFrame prevKF = keyFrames[i-1];
 		KeyFrame currKF = keyFrames[i];
-		int j = i + 1;
-		if (currKF.timestamp-prevKF.timestamp > 10.0)
+		if (currKF.timestamp - prevKF.timestamp > 10.0) {
 			continue;
+		}
 
-		std::shared_ptr<NonlinearSolver::EdgeImu> imuEdge(new NonlinearSolver::EdgeImu(currKF.imuPreintgB));
+		std::shared_ptr<NonlinearSolver::EdgeImu> imuEdge(new NonlinearSolver::EdgeImu(currKF.imuPreintgR));
 		std::vector<std::shared_ptr<NonlinearSolver::Vertex>> edge_vertex;
 		edge_vertex.push_back(vertexCams_vec[i-1]);
 		edge_vertex.push_back(vertexVB_vec[i-1]);
@@ -69,8 +98,11 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 		imuEdge->SetVertex(edge_vertex);
 		problem.AddEdge(imuEdge);
 	}
+#endif
 
 	// Visual Factor
+//#define INVERSE_DEPTH_MP
+#ifdef INVERSE_DEPTH_MP
 	std::vector<std::shared_ptr<NonlinearSolver::VertexInverseDepth>> vertexPt_vec;
 	{
 		int feature_index = -1;
@@ -84,7 +116,7 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 			++feature_index;
 
 			int imu_i = it_per_id.start_frame, imu_j = imu_i - 1;
-			Vector3d pts_i = it_per_id.feature_per_frame[0].point;
+			Eigen::Vector3d pts_i = it_per_id.feature_per_frame[0].point;
 
 			std::shared_ptr<NonlinearSolver::VertexInverseDepth> verterxPoint(new NonlinearSolver::VertexInverseDepth());
 			Eigen::Matrix<double, Eigen::Dynamic, 1> inv_d(1);
@@ -100,7 +132,7 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 				if (imu_i == imu_j)
 					continue;
 
-				Vector3d pts_j = it_per_frame.point;
+				Eigen::Vector3d pts_j = it_per_frame.point;
 
 				std::shared_ptr<NonlinearSolver::EdgeReprojection> edge(new NonlinearSolver::EdgeReprojection(pts_i, pts_j));
 				std::vector<std::shared_ptr<NonlinearSolver::Vertex>> edge_vertex;
@@ -109,38 +141,80 @@ bool NonlinearOptimizationSolver(std::vector<KeyFrame> &keyFrames)
 				edge_vertex.push_back(vertexCams_vec[imu_j]);
 
 				edge->SetVertex(edge_vertex);
-				edge->SetInformation(project_sqrt_info_.transpose() * project_sqrt_info_);
+				edge->SetInformation(projectSqrtInfo.transpose() * projectSqrtInfo);
 
 				edge->SetLossFunction(lossFunction);
 				problem.AddEdge(edge);
 			}
 		}
 	}
+#endif
 
+#define XYZ_MP
+#ifdef XYZ_MP
+	std::vector<std::shared_ptr<NonlinearSolver::VertexPointXYZ>> vertexPt_vec;
+	{
+		// 遍历每一个MapPoint
+		for (int idxMP=0; idxMP <mapPoints.size(); idxMP++){
+			MapPoint mp = mapPoints[idxMP];
+			std::shared_ptr<NonlinearSolver::VertexPointXYZ> verterxPoint(new NonlinearSolver::VertexPointXYZ());
+			Eigen::Matrix<double, Eigen::Dynamic, 1> xyz(3);
+			xyz << mp.x, mp.y, mp.z;
+			verterxPoint->SetParameters(xyz);
+			problem.AddVertex(verterxPoint);
+			vertexPt_vec.push_back(verterxPoint);
+
+			// 遍历所有的观测
+			for (int idxKF=0;idxKF<keyFrames.size();idxKF++){
+				ObsersType obsInKF = keyFrames[idxKF].featuresCam;
+				bool findOb = false;
+				Eigen::Vector3d ob;
+				for (int idxOb = 0; idxOb < obsInKF.size(); idxOb++) {
+					if (mp.id == obsInKF[idxOb].first) {
+						findOb = true;
+						ob << obsInKF[idxOb].second[0], obsInKF[idxOb].second[1], 1.0;
+					}
+				}
+				if (!findOb) { continue; }
+				ob = params.K.inverse()*ob;
+				std::shared_ptr<NonlinearSolver::EdgeReprojectionXYZ> edge(new NonlinearSolver::EdgeReprojectionXYZ(ob));
+				std::vector<std::shared_ptr<NonlinearSolver::Vertex>> edge_vertex;
+				edge_vertex.push_back(verterxPoint);
+				edge_vertex.push_back(vertexCams_vec[idxKF]);
+
+				edge->SetVertex(edge_vertex);
+				Eigen::Matrix2d projectSqrtInfo =  3.0/ 1.5 * Eigen::Matrix2d::Identity();//FOCAL_LENGTH
+				edge->SetInformation(projectSqrtInfo.transpose() * projectSqrtInfo);
+
+				edge->SetLossFunction(lossFunction);
+				problem.AddEdge(edge);
+			}
+		}
+	}
+#endif
 
 	problem.Solve(10);
 
 	// update parameter
-	for (int i = 0; i < numKFs + 1; i++)
+	for (int i = 0; i < numKFs; i++)
 	{
 		Eigen::Matrix<double, Eigen::Dynamic, 1> p = vertexCams_vec[i]->Parameters();
-		for (int j = 0; j < 7; ++j)
-		{
-			para_Pose[i][j] = p[j];
-		}
+		Eigen::Matrix<double, 7, 1> paramPose = p;
+		std::cout << "after ba: " << i << " " << p[0] << " " << p[1] << " " << p[2] << " " << p[3] << " "
+			<< p[4] << " " << p[5] << " " << p[6] << std::endl;
 
-		Eigen::Matrix<double, Eigen::Dynamic, 1> vb = vertexVB_vec[i]->Parameters();
+		/*Eigen::Matrix<double, Eigen::Dynamic, 1> vb = vertexVB_vec[i]->Parameters();
 		for (int j = 0; j < 9; ++j)
 		{
-			para_SpeedBias[i][j] = vb[j];
-		}
+			auto paramVB = vb[j];
+		}*/
 	}
 
 	// 遍历每一个特征
 	for (int i = 0; i < vertexPt_vec.size(); ++i)
 	{
 		Eigen::Matrix<double, Eigen::Dynamic, 1> f = vertexPt_vec[i]->Parameters();
-		para_Feature[i][0] = f[0];
+		auto paramMP = f[0];
 	}
 
 	return true;
@@ -163,12 +237,15 @@ int main(){
 	std::default_random_engine generator(rd());
 	std::normal_distribution<double> noise(0.0, params.camPoseNoise);
 	std::vector<KeyFrame> keyFrames;
-	for (unsigned int idx1 = 1; idx1 < camData.size(); idx1++) {
+	std::vector<MapPoint> mapPoints;
+	std::set<IdType> mpIds;
+	for (unsigned int idx1 = 0; idx1 < (camData.size()-1); idx1++) {
 		KeyFrame keyFrame;
-		MotionData prevCam = camData[idx1 - 1];
 		MotionData currCam = camData[idx1];
-		double prevCamTime = prevCam.timestamp;
+		MotionData nextCam = camData[idx1+1];
 		double currCamTime = currCam.timestamp;
+		double nextCamTime = nextCam.timestamp;
+		std::vector<double> imuTimes;
 		std::vector<Eigen::Vector3d> imuAccs;
 		std::vector<Eigen::Vector3d> imuGyros;
 		std::vector<Eigen::Vector3d> imuAccBiass;
@@ -176,7 +253,8 @@ int main(){
 		for (unsigned int idx2 = 0; idx2 < imuDataNoise.size(); idx2++) {
 			MotionData imu = imuDataNoise[idx2];
 			double imuTime = imu.timestamp;
-			if (imuTime > prevCamTime && imuTime <= currCamTime) {
+			if (imuTime > currCamTime && imuTime <= nextCamTime) {
+				imuTimes.push_back(imuTime);
 				imuAccs.push_back(imu.imuAcc);
 				imuGyros.push_back(imu.imuGyro);
 				imuAccBiass.push_back(imu.imuAccBias);
@@ -185,6 +263,7 @@ int main(){
 		}
 
 		keyFrame.timestamp = currCamTime;
+		keyFrame.imuTimes = imuTimes;
 		keyFrame.imuAccs = imuAccs;
 		keyFrame.imuGyros = imuGyros;
 		keyFrame.accBiass = imuAccBiass;
@@ -199,9 +278,50 @@ int main(){
 		Eigen::Vector3d poseNoise(noise(generator), noise(generator), noise(generator));
 		keyFrame.twcNoise = Eigen::Vector3d(keyFrame.twc+poseNoise);
 		keyFrames.push_back(keyFrame);
+
+		PointsType mPoints = currCam.pointsCam;
+		MapPoint mp;
+		for (int idx2 = 0; idx2 < mPoints.size(); idx2++) {
+			IdType mpId = mPoints[idx2].first;
+			Eigen::Vector4d mpPos = mPoints[idx2].second;
+			if (!mpIds.count(mpId)) {
+				mpIds.emplace(mpId);
+				mp.id = mpId;
+				mp.x = mpPos[0];
+				mp.y = mpPos[1];
+				mp.z = mpPos[2];
+				mapPoints.push_back(mp);
+			}
+		}
 	}
 
-	NonlinearOptimizationSolver(keyFrames);
+	//IMU preintegration
+	for (int idxKF = 0; idxKF < keyFrames.size(); idxKF++) {
+		KeyFrame &kf = keyFrames[idxKF];
+		std::vector<double> imuTimes = kf.imuTimes;
+		std::vector<Eigen::Vector3d> imuAccs = kf.imuAccs;
+		std::vector<Eigen::Vector3d> imuGyros = kf.imuGyros;
+		std::vector<Eigen::Vector3d> imuAccBiass = kf.accBiass;
+		std::vector<Eigen::Vector3d> imuGyroBiass = kf.gyroBiass;
+		IMUData imuData;
+		kf.imuPreintgR = new IMUPreintegRecursive(imuData,imuAccs[0],imuGyros[0],imuAccBiass[0],imuGyroBiass[0]);
+		double dt = 0.0;
+		for (int idxImu = 1; idxImu < imuAccs.size(); idxImu++) {
+			dt = imuTimes[idxImu] - imuTimes[idxImu - 1];
+			kf.imuPreintgR->AddNewImu(dt, imuAccs[idxImu], imuGyros[idxImu]);
+		}
+	}
+
+	//Nonlinear optimization
+	std::vector<KeyFrame> subKeyFrames;
+	subKeyFrames.assign(keyFrames.begin(), keyFrames.begin() + 10);
+	for (auto kf : subKeyFrames) {
+		std::cout << "before ba: " << kf.twc[0] << " " << kf.twc[1] << " " << kf.twc[2] << std::endl;
+	}
+	for (auto kf:subKeyFrames) {
+		std::cout << "before ba noise: " << kf.twcNoise[0]<< " " << kf.twcNoise[1] << " " << kf.twcNoise[2] << std::endl;
+	}
+	NonlinearOptimizationSolver(subKeyFrames,mapPoints);
 
 //#define TRIANGULATION_EVALUATION
 #ifdef TRIANGULATION_EVALUATION

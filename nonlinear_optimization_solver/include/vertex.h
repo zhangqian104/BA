@@ -1,4 +1,4 @@
-#ifndef MYSLAM_BACKEND_VERTEX_H
+﻿#ifndef MYSLAM_BACKEND_VERTEX_H
 #define MYSLAM_BACKEND_VERTEX_H
 
 #include<eigen3/Eigen/Core>

@@ -1,4 +1,4 @@
-#ifndef MYSLAM_BACKEND_VISUALEDGE_H
+﻿#ifndef MYSLAM_BACKEND_VISUALEDGE_H
 #define MYSLAM_BACKEND_VISUALEDGE_H
 
 #include <memory>
@@ -55,7 +55,7 @@ class EdgeReprojectionXYZ : public Edge {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-    EdgeReprojectionXYZ(const Eigen::Matrix<double, 3, 1> &pts_i)
+    EdgeReprojectionXYZ(const Eigen::Vector3d &pts_i)
         : Edge(2, 2, std::vector<std::string>{"VertexXYZ", "VertexPose"}) {
         obs_ = pts_i;
     }

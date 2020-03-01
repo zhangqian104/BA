@@ -1,4 +1,4 @@
-#ifndef MYSLAM_BACKEND_EDGE_H
+﻿#ifndef MYSLAM_BACKEND_EDGE_H
 #define MYSLAM_BACKEND_EDGE_H
 
 #include <memory>

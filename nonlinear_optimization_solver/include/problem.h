@@ -1,4 +1,4 @@
-#ifndef NONLINEAR_SOLVER_PROBLEM_H
+﻿#ifndef NONLINEAR_SOLVER_PROBLEM_H
 #define NONLINEAR_SOLVER_PROBLEM_H
 
 #include <unordered_map>

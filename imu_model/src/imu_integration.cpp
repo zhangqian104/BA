@@ -1,9 +1,10 @@
 #include "imu_integration.h"
 
 namespace SLAM_SIMULATION {
-IMUPreintegRecursive::IMUPreintegRecursive(const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
+IMUPreintegRecursive::IMUPreintegRecursive(IMUData imuNoise_, const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
 	const Eigen::Vector3d &_linearized_ba, const Eigen::Vector3d &_linearized_bg)
 {
+	imuNoise = imuNoise_;
 	acc_0 = _acc_0;
 	gyr_0 = _gyr_0;
 	linearized_acc = _acc_0;
@@ -18,12 +19,12 @@ IMUPreintegRecursive::IMUPreintegRecursive(const Eigen::Vector3d &_acc_0, const 
 	delta_v = Eigen::Vector3d::Zero();
 
 	noise = Eigen::Matrix<double, 18, 18>::Zero();
-	noise.block<3, 3>(0, 0) = (ACC_N * ACC_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(3, 3) = (GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(6, 6) = (ACC_N * ACC_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(9, 9) = (GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(12, 12) = (ACC_W * ACC_W) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(15, 15) = (GYR_W * GYR_W) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(0, 0) = imuNoise.accNoiseCov;//(ACC_N * ACC_N) * Eigen::Matrix3d::Identity();/
+	noise.block<3, 3>(3, 3) = imuNoise.gyroNoiseCov;//(GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(6, 6) = imuNoise.accNoiseCov;//(ACC_N * ACC_N) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(9, 9) = imuNoise.gyroNoiseCov;//(GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(12, 12) = imuNoise.accBiasRWCov;//(ACC_W * ACC_W) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(15, 15) = imuNoise.gyrBiasRWCov;//(GYR_W * GYR_W) * Eigen::Matrix3d::Identity();
 }
 
 void IMUPreintegRecursive::AddNewImu(double dt, const Eigen::Vector3d &acc, const Eigen::Vector3d &gyr)
@@ -175,10 +176,10 @@ if (update_jacobian)
 
 	// put outside
 	Eigen::Matrix<double, 12, 12> noise = Eigen::Matrix<double, 12, 12>::Zero();
-	noise.block<3, 3>(0, 0) = (ACC_N * ACC_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(3, 3) = (GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(6, 6) = (ACC_W * ACC_W) * Eigen::Matrix3d::Identity();
-	noise.block<3, 3>(9, 9) = (GYR_W * GYR_W) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(0, 0) = imuNoise.accNoiseCov;//(ACC_N * ACC_N) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(3, 3) = imuNoise.gyroNoiseCov;//(GYR_N * GYR_N) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(6, 6) = imuNoise.accBiasRWCov;//(ACC_W * ACC_W) * Eigen::Matrix3d::Identity();
+	noise.block<3, 3>(9, 9) = imuNoise.gyrBiasRWCov;//(GYR_W * GYR_W) * Eigen::Matrix3d::Identity();
 
 	//write F directly
 	Eigen::MatrixXd F, V;
@@ -219,7 +220,6 @@ void IMUPreintegRecursive::Propagate(double _dt, const Eigen::Vector3d &_acc_1, 
 	sum_dt += dt;
 	acc_0 = acc_1;
 	gyr_0 = gyr_1;
-
 }
 
 IMUPreintegBatch::IMUPreintegBatch(const IMUPreintegBatch& pre) :
@@ -232,13 +232,15 @@ IMUPreintegBatch::IMUPreintegBatch(const IMUPreintegBatch& pre) :
 	_J_V_Biasa(pre._J_V_Biasa),
 	_J_R_Biasg(pre._J_R_Biasg),
 	_cov_P_V_Phi(pre._cov_P_V_Phi),
-	deltaTime(pre.deltaTime)
+	deltaTime(pre.deltaTime),
+	imuNoise(pre.imuNoise)
 {
 
 }
 
-IMUPreintegBatch::IMUPreintegBatch()
+IMUPreintegBatch::IMUPreintegBatch(IMUData imuNoise_)
 {
+	imuNoise = imuNoise_;
 	// delta measurements, position/velocity/rotation(matrix)
 	_delta_P.setZero();    // P_k+1 = P_k + V_k*dt + R_k*a_k*dt*dt/2
 	_delta_V.setZero();    // V_k+1 = V_k + R_k*a_k*dt
@@ -302,8 +304,8 @@ void IMUPreintegBatch::update(const Eigen::Vector3d& omega, const Eigen::Vector3
 	Ca.block<3, 3>(3, 0) = _delta_R * dt;
 	Ca.block<3, 3>(0, 0) = 0.5*_delta_R*dt2;
 	_cov_P_V_Phi = A * _cov_P_V_Phi*A.transpose() +
-		Bg * IMUData::getGyrMeasCov()*Bg.transpose() +
-		Ca * IMUData::getAccMeasCov()*Ca.transpose();
+		Bg * imuNoise.gyroNoiseCov*Bg.transpose() +//IMUData::getGyrMeasCov()
+		Ca * imuNoise.accNoiseCov*Ca.transpose();//IMUData::getAccMeasCov()
 
 
 	// jacobian of delta measurements w.r.t bias of gyro/acc

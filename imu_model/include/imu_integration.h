@@ -5,6 +5,9 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
 #include "so3.h"
+#include "common.h"
+#include "utility.h"
+#include "param.h"
 
 namespace SLAM_SIMULATION {
 
@@ -13,7 +16,7 @@ class IMUPreintegRecursive
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	IMUPreintegRecursive(const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
+	IMUPreintegRecursive(IMUData imuNoise_, const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
 		const Eigen::Vector3d &_linearized_ba, const Eigen::Vector3d &_linearized_bg);
 
 	void AddNewImu(double dt, const Eigen::Vector3d &acc, const Eigen::Vector3d &gyr);
@@ -87,14 +90,16 @@ public:
 	std::vector<Eigen::Vector3d> acc_buf;
 	std::vector<Eigen::Vector3d> gyr_buf;
 
+private:
+	IMUData imuNoise;
 };
 
 class IMUPreintegBatch
 {
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-	IMUPreintegBatch();
+	IMUPreintegBatch(IMUData imuNoise_);
 	IMUPreintegBatch(const IMUPreintegBatch& pre);
 
 	//IMUPreintegrator& operator = (const IMUPreintegrator& pre);
@@ -274,7 +279,7 @@ private:
 	Eigen::Matrix<double, 9, 9> _cov_P_V_Phi;
 
 	double deltaTime;
-
+	IMUData imuNoise;
 };
 }
 

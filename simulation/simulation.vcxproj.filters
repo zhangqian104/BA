@@ -88,9 +88,6 @@
     <ClCompile Include="..\nonlinear_optimization_solver\src\edge_imu.cc">
       <Filter>nonlinear_optimization_solver\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_prior.cpp">
-      <Filter>nonlinear_optimization_solver\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\nonlinear_optimization_solver\src\edge_reprojection.cc">
       <Filter>nonlinear_optimization_solver\src</Filter>
     </ClCompile>
@@ -133,9 +130,6 @@
       <Filter>nonlinear_optimization_solver\include</Filter>
     </ClInclude>
     <ClInclude Include="..\nonlinear_optimization_solver\include\edge_imu.h">
-      <Filter>nonlinear_optimization_solver\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_prior.h">
       <Filter>nonlinear_optimization_solver\include</Filter>
     </ClInclude>
     <ClInclude Include="..\nonlinear_optimization_solver\include\edge_reprojection.h">
@@ -188,6 +182,9 @@
     </ClInclude>
     <ClInclude Include="..\simulation_data_generation\include\gene_simulate_data.h">
       <Filter>simulation_data_generation\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\id_manage.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

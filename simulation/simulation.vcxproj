@@ -25,7 +25,6 @@
     <ClCompile Include="..\navstate\src\NavState.cpp" />
     <ClCompile Include="..\nonlinear_optimization_solver\src\edge.cc" />
     <ClCompile Include="..\nonlinear_optimization_solver\src\edge_imu.cc" />
-    <ClCompile Include="..\nonlinear_optimization_solver\src\edge_prior.cpp" />
     <ClCompile Include="..\nonlinear_optimization_solver\src\edge_reprojection.cc" />
     <ClCompile Include="..\nonlinear_optimization_solver\src\loss_function.cc" />
     <ClCompile Include="..\nonlinear_optimization_solver\src\problem.cc" />
@@ -38,13 +37,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\common.h" />
+    <ClInclude Include="..\common\id_manage.h" />
     <ClInclude Include="..\common\param.h" />
     <ClInclude Include="..\imu_model\include\imu_integration.h" />
     <ClInclude Include="..\navstate\include\NavState.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\nonlinear_optimization_solver.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\edge.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\edge_imu.h" />
-    <ClInclude Include="..\nonlinear_optimization_solver\include\edge_prior.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\edge_reprojection.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\loss_function.h" />
     <ClInclude Include="..\nonlinear_optimization_solver\include\problem.h" />

@@ -6,10 +6,18 @@
 #include<set>
 #include<eigen3/Eigen/Core>
 #include<eigen3/Eigen/Geometry>
-#include "imu_integration.h"
 
-constexpr float M_PI = 3.14159;
-#define G Eigen::Vector3d (0.0, 0.0, 9.8);
+const float M_PI = 3.14159f;
+const Eigen::Vector3d G = Eigen::Vector3d (0.0, 0.0, 9.8);
+
+enum StateOrder
+{
+	O_P = 0,
+	O_R = 3,
+	O_V = 6,
+	O_BA = 9,
+	O_BG = 12
+};
 
 typedef unsigned long IdType;
 typedef std::pair<IdType, Eigen::Vector4d> PointType;
@@ -19,26 +27,16 @@ typedef std::vector<ObserType, Eigen::aligned_allocator<ObserType>> ObsersType;
 typedef std::pair<Eigen::Vector4d, Eigen::Vector4d> LineType;
 typedef std::vector<LineType, Eigen::aligned_allocator<LineType> > LinesType;
 
-extern IdType g_Id = 0;
-extern void ResetId()
-{
-	g_Id = 0;
-}
-extern IdType NewId()
-{
-	return g_Id++;
-}
-
 struct MapPoint
 {
 	IdType id;
 
-	double x;
-	double y;
-	double z;
+	double x = -1.0;
+	double y = -1.0;
+	double z = -1.0;
 
-	double u;
-	double v;
+	double u=-1.0;
+	double v=-1.0;
 };
 
 struct RowPose
@@ -93,39 +91,23 @@ struct MotionData
 	ObsersType featuresCam;  // 对应的２维图像坐标
 };
 
-struct KeyFrame
-{
-	double timestamp;
-	std::vector<Eigen::Vector3d> imuAccs;
-	std::vector<Eigen::Vector3d> imuGyros;
-	std::vector<Eigen::Vector3d> accBiass;
-	std::vector<Eigen::Vector3d> gyroBiass;
-	std::vector<RowPose> rsPoses;
-	PointsType pointsCam;    // 3D points in current cam
-	ObsersType featuresCam;  // corresponding 2D observations
 
-	Eigen::Matrix3d Rwc;
-	Eigen::Quaterniond qwc;
-	Eigen::Vector3d twc;
-	Eigen::Vector3d twcNoise;
-	Eigen::Vector3d vel;
-
-	/*IMUPreintegRecursive imuPreintgR;
-	IMUPreintegBatch imuPreintgB;*/
-};
 
 struct IMUData
 {
-	// covariance of measurement
-	Eigen::Matrix3d gyrMeasCov = Eigen::Matrix3d::Identity()*1.7e-4*1.7e-4 / 0.005/**100*/;       // sigma_g * sigma_g / dt, ~6e-6*10
-	Eigen::Matrix3d accMeasCov = Eigen::Matrix3d::Identity()*2.0e-3*2.0e-3 / 0.005 * 100;       // sigma_a * sigma_a / dt, ~8e-4*10
+	double gyroNoiseSigma = 1.7e-4;
+	double accNoiseSigma = 2.0e-3;
 
-	double gyrBiasRw2 = 2.0e-5*2.0e-5/**10*/;  //2e-12*1e3
-	double accBiasRw2 = 5.0e-3*5.0e-3/**10*/;  //4.5e-8*1e2
+	// covariance of measurement
+	Eigen::Matrix3d gyroNoiseCov = Eigen::Matrix3d::Identity()*gyroNoiseSigma*gyroNoiseSigma / 0.005/**100*/;       // sigma_g * sigma_g / dt, ~6e-6*10
+	Eigen::Matrix3d accNoiseCov = Eigen::Matrix3d::Identity()*accNoiseSigma*accNoiseSigma / 0.005 * 100;       // sigma_a * sigma_a / dt, ~8e-4*10
+
+	double gyroBiasRw = 2.0e-5/**10*/;  //2e-12*1e3
+	double accoBiasRw = 5.0e-3/**10*/;  //4.5e-8*1e2
 
 	// covariance of bias random walk
-	Eigen::Matrix3d gyrBiasRWCov = Eigen::Matrix3d::Identity()*gyrBiasRw2;     // sigma_gw * sigma_gw * dt, ~2e-12
-	Eigen::Matrix3d accBiasRWCov = Eigen::Matrix3d::Identity()*accBiasRw2;     // sigma_aw * sigma_aw * dt, ~4.5e-8
+	Eigen::Matrix3d gyrBiasRWCov = Eigen::Matrix3d::Identity()*gyroBiasRw*gyroBiasRw;     // sigma_gw * sigma_gw * dt, ~2e-12
+	Eigen::Matrix3d accBiasRWCov = Eigen::Matrix3d::Identity()*accoBiasRw*accoBiasRw;     // sigma_aw * sigma_aw * dt, ~4.5e-8
 
 	// Raw data of imu's
 	Eigen::Vector3d gyro;    //gyr data

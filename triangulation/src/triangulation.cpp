@@ -1,5 +1,5 @@
 #include "triangulation.h"
-#include "utilities.h"
+#include "utility.h"
 #include <eigen3/Eigen/SVD>
 #include <eigen3/Eigen/Dense>
 
